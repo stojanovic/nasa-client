@@ -2,6 +2,20 @@
 
 const rp = require('minimal-request-promise')
 
+function formatDate(date) {
+  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
+}
+
+function parseDate(date) {
+  if (date && typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/g.test(date))
+    return date
+
+  if (date && date instanceof Date)
+    return formatDate(date)
+
+  return false
+}
+
 module.exports = class NASAClient {
   constructor(apiKey) {
     if (!apiKey)
@@ -14,11 +28,27 @@ module.exports = class NASAClient {
   getAPOD(date) {
     let url = `${this.apiUrl}planetary/apod?api_key=${this.apiKey}`
 
-    if (date && typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/g.test(date))
-      url += `&date=${date}`
+    if (parseDate(date))
+      url += `&date=${parseDate(date)}`
 
-    if (date && date instanceof Date)
-      url += `&date=${date.getFullYear}-${date.getMonth() + 1}-${date.getDate()}`
+    return rp.get(url)
+      .then(response => response.body)
+  }
+
+  getNeoFeed(startDate, endDate) {
+    if (!startDate)
+      throw new Error('Start date is required for NEO Feed.')
+
+    if (!parseDate(startDate))
+      throw new Error('Start date needs to be a string in YYYY-MM-DD format or JavaScript date object')
+
+    if (endDate && !parseDate(endDate))
+      throw new Error('End date needs to be a string in YYYY-MM-DD format or JavaScript date object') 
+
+    let url = `${this.apiUrl}/neo/rest/v1/feed?api_key=${this.apiKey}&start_date=${parseDate(startDate)}`
+
+    if (endDate)
+      url += `&end_date=${parseDate(endDate)}`
 
     return rp.get(url)
       .then(response => response.body)
