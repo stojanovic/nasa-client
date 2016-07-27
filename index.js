@@ -53,5 +53,13 @@ module.exports = class NASAClient {
     return rp.get(url)
       .then(response => response.body)
   }
+
+  neoLookup(id) {
+    if (!id)
+      throw new Error('An ID is required for NEO lookup')
+
+    return rp.get(`${this.apiUrl}/neo/rest/v1/neo/${id}?api_key=${this.apiKey}`)
+      .then(response => response.body)
+  }
 }
 
