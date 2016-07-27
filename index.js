@@ -61,5 +61,10 @@ module.exports = class NASAClient {
     return rp.get(`${this.apiUrl}/neo/rest/v1/neo/${id}?api_key=${this.apiKey}`)
       .then(response => response.body)
   }
+
+  neoBrowse() {
+    return rp.get(`${this.apiUrl}/neo/rest/v1/neo/browse?api_key=${this.apiKey}`)
+      .then(response => response.body)
+  }
 }
 
